@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --color-cream: #f6f2ec;
+  --color-cream-50: #fbf9f6;
+  --color-sand: #efe8dd;
+
+  --color-ink: #1c2430;
+  --color-ink-soft: #59667a;
+  --color-ink-faint: #97a2b3;
+
+  --color-primary-50: #fdf1e6;
+  --color-primary-100: #fbe1cb;
+  --color-primary-200: #f6c398;
+  --color-primary-300: #f0a066;
+  --color-primary-400: #e6813f;
+  --color-primary-500: #d97327;
+  --color-primary-600: #bd5f1d;
+  --color-primary-700: #984b19;
+  --color-primary-800: #7a3c18;
+  --color-primary-900: #4a2410;
+
+  --color-teal-50: #e9f8f2;
+  --color-teal-400: #34b391;
+  --color-teal-500: #219473;
+
+  --color-violet-50: #f1edfd;
+  --color-violet-400: #8d76ef;
+  --color-violet-500: #7357e0;
+
+  --color-azure-50: #e9f3fd;
+  --color-azure-400: #4d9fe6;
+  --color-azure-500: #3382cc;
+
+  --color-rose-50: #fdeef4;
+  --color-rose-400: #e0619b;
+  --color-rose-500: #c64684;
+
+  --shadow-card: 0 1px 2px rgba(28, 36, 48, 0.04), 0 12px 32px -16px rgba(28, 36, 48, 0.12);
+  --shadow-card-lg: 0 4px 8px rgba(28, 36, 48, 0.04), 0 24px 48px -20px rgba(28, 36, 48, 0.18);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* ---- Landing hero ---- */
+  .hero-slide {
+    opacity: 0;
+    transform: scale(1);
+    transition: opacity 900ms cubic-bezier(0.23, 1, 0.32, 1), transform 900ms ease-out;
+  }
+  .hero-slide.is-active {
+    opacity: 1;
+    transform: scale(1.08);
+    transition: opacity 900ms cubic-bezier(0.23, 1, 0.32, 1), transform 9s linear;
+  }
+
+  .hero-rise {
+    opacity: 0;
+    animation: hero-rise 650ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+  .hero-fade {
+    animation: hero-fade 350ms ease-out both;
+  }
+  .hero-progress {
+    animation: hero-progress 7s linear forwards;
+  }
+  .hero-press {
+    transition: transform 160ms ease-out, background-color 160ms ease-out;
+  }
+  .hero-press:active {
+    transform: scale(0.97);
+  }
+
+  /* Eight-point star lattice, a nod to zellige tilework */
+  .hero-zellige {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72' fill='none' stroke='white' stroke-width='1'%3E%3Cpath d='M36 4L43 20 58 14 52 29 68 36 52 43 58 58 43 52 36 68 29 52 14 58 20 43 4 36 20 29 14 14 29 20Z'/%3E%3C/svg%3E");
+    opacity: 0.07;
+    -webkit-mask-image: linear-gradient(to left, black, transparent);
+    mask-image: linear-gradient(to left, black, transparent);
+  }
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes hero-fade {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes hero-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-slide.is-active {
+      transform: none;
+      transition: opacity 400ms ease;
+    }
+    .hero-rise,
+    .hero-fade {
+      animation: hero-fade-only 300ms ease both;
+      opacity: 1;
+    }
+    .hero-progress {
+      animation: none;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes hero-fade-only {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+}

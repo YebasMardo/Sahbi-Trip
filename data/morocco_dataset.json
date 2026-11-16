@@ -1,0 +1,3692 @@
+{
+  "meta": {
+    "name": "Sahbi Trip — dataset MVP (Casablanca, Marrakech, Rabat)",
+    "schemaVersion": "1.0",
+    "generatedAt": "2026-09-23",
+    "currency": "MAD",
+    "cities": [
+      "Casablanca",
+      "Marrakech",
+      "Rabat"
+    ],
+    "counts": {
+      "activities": 46,
+      "restaurants": 22,
+      "freeActivities": 21
+    },
+    "method": "Recherche web (sites officiels quand trouvés, guides de voyage, sites de réservation) ; aucune donnée issue de la mémoire du modèle pour les prix, horaires, contacts. Les coordonnées GPS sont approximatives (voir coordinates.precision).",
+    "rules": [
+      "null = information non trouvée ou non confirmée : NE JAMAIS la remplacer par une valeur inventée ; afficher « non renseigné ».",
+      "priceConfidence: high (site officiel) | medium (plusieurs sources récentes concordantes) | low (source unique, ancienne ou contradictoire).",
+      "priceRange = fourchette quand les sources se contredisent ; price = valeur retenue (adulte étranger) ou null.",
+      "durationBasis: source = durée trouvée dans une source ; estimate = estimation éditoriale à ajuster.",
+      "category : nature, culture, histoire, plage, shopping, medina, parc, zoo, parc-attractions, place, promenade.",
+      "isFree = true quand price vaut 0 (accès libre). Les lieux gratuits n'ont de sens que pour l'entrée : activités annexes et transport restent payants.",
+      "touristLevel = estimation éditoriale (high/medium/low), pas une donnée sourcée.",
+      "popularity et rating = null partout : à alimenter plus tard (ne pas inventer).",
+      "avgPricePerPerson = null pour tous les restaurants : les sources donnent au mieux un niveau de prix ($/€), pas de tarifs en MAD."
+    ],
+    "assumptionsToCalibrate": {
+      "note": "HYPOTHÈSE de travail, non issue des sources : équivalence indicative du niveau de prix restaurant, par personne, hors boissons alcoolisées. À calibrer avec des prix réels avant la démo.",
+      "$": "< 80 MAD",
+      "$$": "80-200 MAD",
+      "$$$": "200-450 MAD",
+      "$$$$": "> 450 MAD"
+    },
+    "knownGaps": [
+      "Aucun hébergement collecté dans ce fichier.",
+      "Aucun zoo trouvé pour Marrakech ; les parcs à Marrakech sont surtout aquatiques (Oasiria, Aqua Mirage).",
+      "Zoo de Rabat et Zoo d'Aïn Sebaâ (horaires) : tarifs/horaires actuels absents ou périmés dans les sources. Les données Sindibad et Tamaris (2026) reposent sur un seul site (guide-casa.ma) : à croiser avec les sites officiels.",
+      "Tarifs restaurants en MAD non disponibles ; coordonnées GPS des restaurants absentes ; adresses incomplètes pour certains lieux.",
+      "Plusieurs prix d'entrée (Tombeaux saadiens, Zoo de Rabat, Médersa Ben Youssef, Chellah, Slaoui, Judaïsme marocain, MMVI) non confirmés pour 2026.",
+      "Les prix des sites touristiques changent : reconfirmer les 3-4 lieux de la démo sur les sites officiels juste avant la présentation.",
+      "Aucune image renseignée (champ `image` à null pour les 68 lieux) : voir meta.images et le script enrich-images.mjs."
+    ],
+    "priorityToReverify": [
+      "Jardin Majorelle (site officiel)",
+      "Mosquée Hassan II (fmh2.ma)",
+      "Palais Bahia et El Badi (tarifs 100 MAD issus de sites non officiels)"
+    ],
+    "images": {
+      "status": "aucune image renseignée dans ce fichier (68 champs `image` à null, status = todo)",
+      "why": "Les outils utilisés pour générer ce fichier ne donnent pas accès à des URL d'images vérifiables et libres de droits. Aucune URL n'a été devinée : une URL inventée serait cassée ou illégale à afficher.",
+      "howToFill": "Lancer backend/scripts/enrich-images.mjs (voir guide §11.8) : il cherche l'image Wikimedia Commons de chaque lieu, vérifie licence et crédit, puis remplit `image`.",
+      "fields": {
+        "url": "image principale (800 px) ; ou chemin local /images/places/<id>.jpg si --download",
+        "thumbnailUrl": "vignette (400 px)",
+        "credit": "auteur à afficher",
+        "license": "licence à afficher (ex. CC BY-SA 4.0)",
+        "licenseUrl": "lien de la licence",
+        "sourceUrl": "page du fichier sur Wikimedia Commons",
+        "status": "todo | auto | auto-review (correspondance faible, à contrôler) | manual (choisie à la main, jamais écrasée) | none (pas d'image, placeholder)"
+      },
+      "rules": [
+        "Ne jamais inventer d'URL d'image ; ne jamais utiliser une image copiée d'un site tiers sans licence.",
+        "Afficher credit et license à côté de toute image sous licence CC (obligation d'attribution).",
+        "Si image.url est null, l'UI affiche le placeholder de la catégorie (meta.imagePlaceholders).",
+        "Les restaurants n'ont en général pas d'image libre : prévoir le placeholder ou une image manuelle (status = manual)."
+      ]
+    },
+    "imagePlaceholders": {
+      "culture": "landmark",
+      "histoire": "scroll-text",
+      "nature": "leaf",
+      "plage": "waves",
+      "shopping": "shopping-bag",
+      "medina": "store",
+      "parc": "trees",
+      "zoo": "paw-print",
+      "parc-attractions": "ferris-wheel",
+      "place": "building-2",
+      "promenade": "footprints",
+      "restaurant": "utensils"
+    },
+    "demoData": {
+      "status": "MVP demo placeholders — Google Places API not wired into this project yet",
+      "why": "rating, userRatingCount and phone are cosmetic placeholders generated for the demo dashboard so it doesn't look empty before real Google Places data is integrated. They are NOT sourced and must never be presented as verified.",
+      "fields": {
+        "demoDataFields": "string[] on an item = which of {rating, userRatingCount, phone} were fabricated for that item. Absent or empty = nothing on this item was fabricated (data is either real or still null)."
+      },
+      "rules": [
+        "Every field name listed in demoDataFields is a fabricated placeholder, not sourced data — the frontend must render a visible \"Example data — not verified\" badge next to each one and never render it as a live tel: link or clickable action.",
+        "website is deliberately never fabricated (left null when unknown) — a fake domain is riskier to demo than a placeholder rating/phone.",
+        "coordinates are deliberately never fabricated — a wrong guess is misleading on a map, unlike a plausible star rating.",
+        "This is a scoped, explicit exception to the dataset-wide \"never invent a null value\" rule above, confirmed by the project owner — see demoDataFields for exactly which fields it applies to."
+      ]
+    }
+  },
+  "activities": [
+    {
+      "id": "marrakech-jardin-majorelle",
+      "type": "activity",
+      "name": "Jardin Majorelle",
+      "city": "Marrakech",
+      "category": "nature",
+      "description": "Jardin botanique créé par Jacques Majorelle puis sauvé par Yves Saint Laurent : bleu cobalt, bambous, cactus, bassins. Deux musées voisins (berbère et YSL).",
+      "price": 170,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Jardin seul ≈170 MAD ; +Musée berbère ≈230 MAD ; billet combiné avec Musée YSL ≈330 MAD. Billets vendus uniquement en ligne (créneaux horaires), site officiel : tickets.jardinmajorelle.com. Tarifs indicatifs, à confirmer sur le site officiel.",
+      "priceConfidence": "medium",
+      "duration": 75,
+      "durationBasis": "source",
+      "openingHours": "Tous les jours 8h00-18h30 (dernier accès 18h00)",
+      "address": "Rue Yves Saint Laurent, Guéliz, Marrakech",
+      "coordinates": {
+        "lat": 31.642,
+        "lng": -8.003,
+        "precision": "approx"
+      },
+      "website": "https://www.jardinmajorelle.com/",
+      "phone": "+212 524 165 670",
+      "touristLevel": "high",
+      "tags": [
+        "jardin",
+        "photo",
+        "calme",
+        "musée"
+      ],
+      "requiresBooking": true,
+      "popularity": null,
+      "rating": 3.9,
+      "notes": null,
+      "sources": [
+        "https://www.jardinmajorelle.com/",
+        "https://marrakech.me/fr/jardin-majorelle/",
+        "https://riad-selouane.net/fr/jardin-majorelle/",
+        "https://www.serenitymoroccotours.com/blog/jardin-majorelle-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Le_jardin_des_majorelle_40.JPG?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Le_jardin_des_majorelle_40.JPG?width=400",
+        "credit": "Viault",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Le_jardin_des_majorelle_40.JPG",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Majorelle_Garden",
+        "matchedBy": "en:Majorelle Garden (gps:0.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 234,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-palais-bahia",
+      "type": "activity",
+      "name": "Palais Bahia",
+      "city": "Marrakech",
+      "category": "culture",
+      "description": "Palais du XIXe siècle : cours, plafonds en cèdre peint, zelliges et jardins intérieurs. Très fréquenté, mieux vaut arriver à l'ouverture.",
+      "price": 100,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "100 MAD selon des sites 2026 (non officiels) ; enfants 7-13 ans ≈50 MAD, gratuit <7 ans. Des guides plus anciens indiquent 70 MAD. Paiement en espèces à l'entrée.",
+      "priceConfidence": "medium",
+      "duration": 75,
+      "durationBasis": "source",
+      "openingHours": "Tous les jours 9h00-17h00",
+      "address": "Médina / quartier Mellah, Marrakech",
+      "coordinates": {
+        "lat": 31.6216,
+        "lng": -7.9833,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 524 801 219",
+      "touristLevel": "high",
+      "tags": [
+        "palais",
+        "architecture",
+        "histoire"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.4,
+      "notes": null,
+      "sources": [
+        "https://www.visitbahiapalace.com/en/faq",
+        "https://bahiapalace.com/entrance-fee",
+        "https://www.visitbahiapalace.com/en"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Bahia_Palace_large_court.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bahia_Palace_large_court.jpg?width=400",
+        "credit": "Val Traveler",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bahia_Palace_large_court.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Bahia_Palace",
+        "matchedBy": "en:Bahia Palace (gps:0.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 237,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-palais-el-badi",
+      "type": "activity",
+      "name": "Palais El Badi",
+      "city": "Marrakech",
+      "category": "histoire",
+      "description": "Ruines monumentales d'un palais saadien du XVIe siècle : grands bassins, orangers en contrebas, cigognes sur les remparts, belle vue depuis les murs.",
+      "price": 100,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "≈100 MAD adulte étranger ; enfants <12 ans ≈30 MAD (selon sources). Billets sur place, espèces conseillées.",
+      "priceConfidence": "medium",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": "Tous les jours 9h00-17h00 (dernière entrée 16h30)",
+      "address": "Quartier de la Kasbah, Marrakech",
+      "coordinates": {
+        "lat": 31.6182,
+        "lng": -7.9853,
+        "precision": "approx"
+      },
+      "website": "https://www.badipalace.com/",
+      "phone": "+212 524 835 208",
+      "touristLevel": "medium",
+      "tags": [
+        "ruines",
+        "histoire",
+        "photo"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.2,
+      "notes": null,
+      "sources": [
+        "https://www.badipalace.com/",
+        "https://morocco-phototours.com/el-badi-palace-photo-tour-opening-hours/",
+        "https://www.daysmoroccotours.com/el-badi-palace/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%CE%9A%CE%B5%CE%BD%CF%84%CF%81%CE%B9%CE%BA%CE%AE_%CE%B1%CF%85%CE%BB%CE%AE_%CE%95%CE%BB_%CE%9C%CF%80%CE%B1%CE%BD%CF%84%CE%AF_1127.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%CE%9A%CE%B5%CE%BD%CF%84%CF%81%CE%B9%CE%BA%CE%AE_%CE%B1%CF%85%CE%BB%CE%AE_%CE%95%CE%BB_%CE%9C%CF%80%CE%B1%CE%BD%CF%84%CE%AF_1127.jpg?width=400",
+        "credit": "C messier",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%CE%9A%CE%B5%CE%BD%CF%84%CF%81%CE%B9%CE%BA%CE%AE_%CE%B1%CF%85%CE%BB%CE%AE_%CE%95%CE%BB_%CE%9C%CF%80%CE%B1%CE%BD%CF%84%CE%AF_1127.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/El_Badi_Palace",
+        "matchedBy": "en:El Badi Palace (gps:0.0km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 99,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-tombeaux-saadiens",
+      "type": "activity",
+      "name": "Tombeaux saadiens",
+      "city": "Marrakech",
+      "category": "histoire",
+      "description": "Nécropole royale saadienne du XVIe siècle, murée pendant deux siècles et redécouverte en 1917. Salle des douze colonnes en cèdre sculpté et zelliges.",
+      "price": null,
+      "priceRange": [
+        70,
+        100
+      ],
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Prix non confirmé pour 2026 : les sources donnent ≈70 MAD (anciennes) à ≈100 MAD. Horaires non confirmés (vérifier sur place).",
+      "priceConfidence": "low",
+      "duration": 40,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Quartier de la Kasbah, Marrakech",
+      "coordinates": {
+        "lat": 31.6178,
+        "lng": -7.9889,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 524 466 348",
+      "touristLevel": "high",
+      "tags": [
+        "histoire",
+        "architecture"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.6,
+      "notes": null,
+      "sources": [
+        "https://www.nomadicmatt.com/travel-guides/morocco-travel-guide/marrakesh/",
+        "https://www.savoredjourneys.com/?p=41722"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Bahia_Palace_large_court.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bahia_Palace_large_court.jpg?width=400",
+        "credit": "Val Traveler",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bahia_Palace_large_court.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Bahia_Palace",
+        "matchedBy": "en:Bahia Palace (gps:0.8km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 323,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-place-jemaa-el-fna",
+      "type": "activity",
+      "name": "Place Jemaa el-Fna",
+      "city": "Marrakech",
+      "category": "culture",
+      "description": "Grande place de la médina : conteurs, musiciens et jongleurs, puis étals de cuisine de rue le soir. Chaotique et très animée.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 90,
+      "durationBasis": "estimate",
+      "openingHours": "Accessible en continu ; animation surtout en fin de journée et le soir",
+      "address": "Place Jemaa el-Fna, médina, Marrakech",
+      "coordinates": {
+        "lat": 31.6258,
+        "lng": -7.9891,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 524 597 496",
+      "touristLevel": "high",
+      "tags": [
+        "place",
+        "street-food",
+        "ambiance",
+        "gratuit",
+        "soirée"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.3,
+      "notes": null,
+      "sources": [
+        "https://www.nomadicmatt.com/travel-guides/morocco-travel-guide/marrakesh/",
+        "https://trenitalia.musement.com/uk/marrakech/marrakech-private-full-day-city-tour-with-a-driver-229860/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Djemaa_el_Fna.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Djemaa_el_Fna.jpg?width=400",
+        "credit": "Boris Macek",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Djemaa_el_Fna.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Jemaa_el-Fnaa",
+        "matchedBy": "en:Jemaa el-Fnaa (gps:0.0km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 341,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-mosquee-koutoubia",
+      "type": "activity",
+      "name": "Mosquée Koutoubia",
+      "city": "Marrakech",
+      "category": "culture",
+      "description": "Minaret emblématique de Marrakech, repère de la médina. Visible de l'extérieur uniquement : l'intérieur est fermé aux non-musulmans.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 30,
+      "durationBasis": "estimate",
+      "openingHours": "Extérieur visible en permanence",
+      "address": "Près de Jemaa el-Fna, Marrakech",
+      "coordinates": {
+        "lat": 31.6237,
+        "lng": -7.9938,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 524 667 263",
+      "touristLevel": "high",
+      "tags": [
+        "mosquée",
+        "monument",
+        "gratuit"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 3.9,
+      "notes": null,
+      "sources": [
+        "https://marrakechbestof.com/que-voir-a-marrakech/?lang=en",
+        "https://trenitalia.musement.com/uk/marrakech/marrakech-private-full-day-city-tour-with-a-driver-229860/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Koutbia.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Koutbia.jpg?width=400",
+        "credit": "joaomaximo",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Koutbia.jpg",
+        "status": "auto-review",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Landmarks_of_Marrakesh",
+        "matchedBy": "en:Landmarks of Marrakesh (text)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 326,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-le-jardin-secret",
+      "type": "activity",
+      "name": "Le Jardin Secret",
+      "city": "Marrakech",
+      "category": "nature",
+      "description": "Ancien riad-palais de la médina avec jardins et un café en terrasse offrant une vue sur la ville.",
+      "price": 60,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "60 MAD, tarif réduit ≈40 MAD (7-24 ans) selon une source non datée : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": "Tous les jours 9h30-18h00 (selon une source non datée)",
+      "address": "Médina, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 351 557",
+      "touristLevel": "medium",
+      "tags": [
+        "jardin",
+        "calme",
+        "café"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.2,
+      "notes": null,
+      "sources": [
+        "https://marrakechbestof.com/que-voir-a-marrakech/?lang=en"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=400",
+        "credit": "Acp",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pavillon_Menarag%C3%A4rten.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Marrakesh",
+        "matchedBy": "en:Marrakesh (gps:1.8km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 84,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-maison-de-la-photographie",
+      "type": "activity",
+      "name": "Maison de la Photographie",
+      "city": "Marrakech",
+      "category": "culture",
+      "description": "Musée de photographies anciennes du Maroc (1870-1950), réparties sur trois étages.",
+      "price": 50,
+      "priceRange": [
+        40,
+        50
+      ],
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "50 MAD (Nomadic Matt) ; 40 MAD (source plus ancienne). À vérifier.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Médina, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 306 756",
+      "touristLevel": "low",
+      "tags": [
+        "musée",
+        "photo",
+        "histoire"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://www.nomadicmatt.com/travel-guides/morocco-travel-guide/marrakesh/",
+        "https://thegoldenbun.com/?p=25777"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=400",
+        "credit": "Acp",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pavillon_Menarag%C3%A4rten.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Marrakesh",
+        "matchedBy": "en:Marrakesh (gps:1.8km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 48,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-medersa-ben-youssef",
+      "type": "activity",
+      "name": "Médersa Ben Youssef",
+      "city": "Marrakech",
+      "category": "culture",
+      "description": "Ancienne école coranique du XIVe siècle, célèbre pour ses zelliges, ses boiseries et sa cour centrale.",
+      "price": null,
+      "priceRange": [
+        20,
+        70
+      ],
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Prix contradictoires selon les sources (20 à 70 MAD) ; a été fermée pour rénovation par le passé : vérifier l'ouverture avant de la planifier.",
+      "priceConfidence": "low",
+      "duration": 45,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Médina, Marrakech",
+      "coordinates": {
+        "lat": 31.6318,
+        "lng": -7.9868,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 524 663 547",
+      "touristLevel": "high",
+      "tags": [
+        "architecture",
+        "histoire",
+        "photo"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.5,
+      "notes": null,
+      "sources": [
+        "https://www.nomadicmatt.com/travel-guides/morocco-travel-guide/marrakesh/",
+        "https://thegoldenbun.com/?p=25777"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Coranic_School_(106589859).jpeg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Coranic_School_(106589859).jpeg?width=400",
+        "credit": "Wolfgang B",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Coranic_School_(106589859).jpeg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Ben_Youssef_Madrasa",
+        "matchedBy": "en:Ben Youssef Madrasa (gps:0.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 333,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-musee-yves-saint-laurent-marrakech",
+      "type": "activity",
+      "name": "Musée Yves Saint Laurent Marrakech",
+      "city": "Marrakech",
+      "category": "culture",
+      "description": "Musée consacré à la carrière du couturier, voisin du Jardin Majorelle, ouvert en 2017.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Billet combiné Jardin + Musée berbère + Musée YSL ≈330 MAD (2026). Prix du musée seul non confirmé (≈100 MAD dans des sources plus anciennes).",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Rue Yves Saint Laurent, Guéliz, Marrakech",
+      "coordinates": {
+        "lat": 31.6419,
+        "lng": -8.0027,
+        "precision": "approx"
+      },
+      "website": "https://www.jardinmajorelle.com/",
+      "phone": "+212 524 056 326",
+      "touristLevel": "high",
+      "tags": [
+        "musée",
+        "mode",
+        "design"
+      ],
+      "requiresBooking": true,
+      "popularity": null,
+      "rating": 4.4,
+      "notes": null,
+      "sources": [
+        "https://www.jardinmajorelle.com/",
+        "https://marrakech.me/fr/jardin-majorelle/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=400",
+        "credit": "Acp",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pavillon_Menarag%C3%A4rten.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Marrakesh",
+        "matchedBy": "en:Marrakesh (gps:1.4km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 268,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-mosquee-hassan-ii",
+      "type": "activity",
+      "name": "Mosquée Hassan II",
+      "city": "Casablanca",
+      "category": "culture",
+      "description": "L'une des plus grandes mosquées du monde, minaret de 210 m, au bord de l'océan. Seule mosquée du Maroc ouverte aux non-musulmans, uniquement en visite guidée (≈45 min).",
+      "price": 140,
+      "priceRange": [
+        130,
+        140
+      ],
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "≈140 MAD adulte étranger (130 à 140 selon les sources) ; enfants dès 6 ans ≈30 MAD ; Marocains/résidents ≈70 MAD. Tenue couvrante obligatoire. Tarifs officiels sur fmh2.ma.",
+      "priceConfidence": "medium",
+      "duration": 90,
+      "durationBasis": "source",
+      "openingHours": "Visites guidées à heures fixes. 15 mars-15 sept : sam-jeu 9h, 10h, 11h, 12h, 15h, 16h ; ven 9h, 10h, 15h, 16h. 16 sept-14 mars : sam-jeu 9h, 10h, 11h, 12h, 15h. Fermé aux visiteurs pendant les prières ; horaires réduits pendant le Ramadan.",
+      "address": "Corniche, quartier Bourgogne, Casablanca",
+      "coordinates": {
+        "lat": 33.6084,
+        "lng": -7.6326,
+        "precision": "approx"
+      },
+      "website": "https://www.fmh2.ma/en",
+      "phone": "+212 522 135 712",
+      "touristLevel": "high",
+      "tags": [
+        "mosquée",
+        "architecture",
+        "incontournable",
+        "océan"
+      ],
+      "requiresBooking": true,
+      "popularity": null,
+      "rating": 4.2,
+      "notes": null,
+      "sources": [
+        "https://www.routard.com/fr/guide/afrique/maroc/cote-atlantique/casablanca/mosquee-hassan-ii",
+        "https://mesloisirs.ma/casablanca/mosquee-hassan-ii/billets-tarifs-2026",
+        "https://www.barcelo.com/guia-turismo/fr/maroc/casablanca/a-voir-et-a-faire/mosquee-hassan-ii/",
+        "https://www.fmh2.ma/fr/mosqu%C3%A9e/visites/visites-guid%C3%A9es-payantes"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 400,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-corniche-d-ain-diab",
+      "type": "activity",
+      "name": "Corniche d'Aïn Diab",
+      "city": "Casablanca",
+      "category": "plage",
+      "description": "Front de mer de Casablanca : promenade, cafés et restaurants face à l'Atlantique, du secteur de la Mosquée Hassan II jusqu'à Aïn Diab.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 90,
+      "durationBasis": "estimate",
+      "openingHours": "Accessible en continu",
+      "address": "Boulevard de la Corniche, Aïn Diab, Casablanca",
+      "coordinates": {
+        "lat": 33.5926,
+        "lng": -7.675,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 522 993 950",
+      "touristLevel": "medium",
+      "tags": [
+        "mer",
+        "promenade",
+        "gratuit",
+        "coucher-de-soleil"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 3.8,
+      "notes": null,
+      "sources": [
+        "https://www.holidify.com/places/casablanca/sightseeing-and-things-to-do.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Boulevard_de_la_Corniche%2C_Dar-el-Beida%2C_Morocco_-_panoramio_(13).jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Boulevard_de_la_Corniche%2C_Dar-el-Beida%2C_Morocco_-_panoramio_(13).jpg?width=400",
+        "credit": "Patrick Nouhailler's…",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Boulevard_de_la_Corniche%2C_Dar-el-Beida%2C_Morocco_-_panoramio_(13).jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/A%C3%AFn_Diab",
+        "matchedBy": "fr:Aïn Diab (gps:1.5km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 162,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-quartier-des-habous",
+      "type": "activity",
+      "name": "Quartier des Habous",
+      "city": "Casablanca",
+      "category": "shopping",
+      "description": "Quartier construit à l'époque du protectorat, dans un style néo-marocain : ruelles calmes, souk d'artisanat, librairies et pâtisseries.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 120,
+      "durationBasis": "estimate",
+      "openingHours": "Boutiques : horaires variables ; à visiter en journée",
+      "address": "Quartier Habous, Casablanca",
+      "coordinates": {
+        "lat": 33.5773,
+        "lng": -7.6089,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 522 214 891",
+      "touristLevel": "medium",
+      "tags": [
+        "souk",
+        "artisanat",
+        "pâtisserie",
+        "architecture",
+        "gratuit"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.1,
+      "notes": null,
+      "sources": [
+        "https://www.gateway2morocco.com/casablanca-travel-guide",
+        "https://www-lonelyplanet-com-57e2.imagizer.com/morocco/casablanca/restaurants"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%D8%B9%D9%85%D8%A7%D8%B1%D8%A9_%D9%85%D8%A7%D8%BA%D8%A7%D9%8A.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%D8%B9%D9%85%D8%A7%D8%B1%D8%A9_%D9%85%D8%A7%D8%BA%D8%A7%D9%8A.jpg?width=400",
+        "credit": "إيان",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D8%B9%D9%85%D8%A7%D8%B1%D8%A9_%D9%85%D8%A7%D8%BA%D8%A7%D9%8A.jpg",
+        "status": "auto-review",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Architecture_of_Casablanca",
+        "matchedBy": "en:Architecture of Casablanca (text)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 159,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-centre-art-deco-et-place-mohammed-v",
+      "type": "activity",
+      "name": "Centre Art déco et Place Mohammed V",
+      "city": "Casablanca",
+      "category": "histoire",
+      "description": "Promenade à pied dans le centre-ville colonial : immeubles Art déco du début du XXe siècle et grande place administrative.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 90,
+      "durationBasis": "estimate",
+      "openingHours": "Accessible en continu",
+      "address": "Centre-ville, Place Mohammed V, Casablanca",
+      "coordinates": {
+        "lat": 33.5948,
+        "lng": -7.6188,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 522 190 484",
+      "touristLevel": "low",
+      "tags": [
+        "architecture",
+        "art-déco",
+        "balade",
+        "gratuit"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://www.gateway2morocco.com/casablanca-travel-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%D8%B9%D9%85%D8%A7%D8%B1%D8%A9_%D9%85%D8%A7%D8%BA%D8%A7%D9%8A.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%D8%B9%D9%85%D8%A7%D8%B1%D8%A9_%D9%85%D8%A7%D8%BA%D8%A7%D9%8A.jpg?width=400",
+        "credit": "إيان",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D8%B9%D9%85%D8%A7%D8%B1%D8%A9_%D9%85%D8%A7%D8%BA%D8%A7%D9%8A.jpg",
+        "status": "auto-review",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Architecture_of_Casablanca",
+        "matchedBy": "en:Architecture of Casablanca (text)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 49,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-musee-de-la-fondation-abderrahman-slaoui",
+      "type": "activity",
+      "name": "Musée de la Fondation Abderrahman Slaoui",
+      "city": "Casablanca",
+      "category": "culture",
+      "description": "Musée privé installé dans une villa Art déco restaurée : affiches orientalistes de voyage, peintures et objets d'art décoratif, sur trois étages.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Tarif et horaires non trouvés : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "12 Rue du Parc, Casablanca",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 522 315 520",
+      "touristLevel": "low",
+      "tags": [
+        "musée",
+        "art-déco",
+        "affiches"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://www.holidify.com/places/casablanca/sightseeing-and-things-to-do.html",
+        "https://www.gateway2morocco.com/casablanca-travel-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mus%C3%A9e_gen%C3%A8se_3.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mus%C3%A9e_gen%C3%A8se_3.jpg?width=400",
+        "credit": "Musée Abderrahman Slaoui",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mus%C3%A9e_gen%C3%A8se_3.jpg",
+        "status": "auto-review",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Abderrahman_Slaoui_Museum",
+        "matchedBy": "en:Abderrahman Slaoui Museum (text)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 19,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-musee-du-judaisme-marocain",
+      "type": "activity",
+      "name": "Musée du Judaïsme marocain",
+      "city": "Casablanca",
+      "category": "histoire",
+      "description": "Le seul musée du monde arabe consacré au patrimoine juif d'un pays, dans le quartier de l'Oasis.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Tarif et horaires non trouvés : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Quartier Oasis, Casablanca",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 522 515 632",
+      "touristLevel": "low",
+      "tags": [
+        "musée",
+        "histoire",
+        "culture"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://www.gateway2morocco.com/casablanca-travel-guide",
+        "https://www.getyourguide.com/casablanca-l244/casablanca-hassan-ii-mosque-and-jewish-museum-guided-tour-t844069/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%D7%91%D7%99%D7%AA_%D7%91%D7%AA%D7%9E%D7%97%D7%95%D7%99_%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%D7%91%D7%99%D7%AA_%D7%91%D7%AA%D7%9E%D7%97%D7%95%D7%99_%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D.jpg?width=400",
+        "credit": "Danielsuraqui",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D7%91%D7%99%D7%AA_%D7%91%D7%AA%D7%9E%D7%97%D7%95%D7%99_%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D.jpg",
+        "status": "auto-review",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Casablanca_Children's_Soup_Kitchen",
+        "matchedBy": "en:Casablanca Children's Soup Kitchen (text)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 66,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-tour-hassan-et-mausolee-mohammed-v",
+      "type": "activity",
+      "name": "Tour Hassan et Mausolée Mohammed V",
+      "city": "Rabat",
+      "category": "histoire",
+      "description": "Esplanade de la tour Hassan inachevée, colonnes de l'ancienne mosquée, et Mausolée de Mohammed V. L'accès à l'esplanade est gratuit.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": "Esplanade accessible en journée",
+      "address": "Quartier Hassan, Rabat",
+      "coordinates": {
+        "lat": 34.0245,
+        "lng": -6.8227,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 537 052 324",
+      "touristLevel": "medium",
+      "tags": [
+        "monument",
+        "histoire",
+        "gratuit",
+        "photo"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.4,
+      "notes": null,
+      "sources": [
+        "https://airial.travel/attractions/morocco/rabat/hassan-quarter-TLDD1qkd"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Morocco_-_Mausoleum_of_Mohammed_V.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Morocco_-_Mausoleum_of_Mohammed_V.jpg?width=400",
+        "credit": "P. Hughes",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Morocco_-_Mausoleum_of_Mohammed_V.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/Mausol%C3%A9e_Mohammed-V",
+        "matchedBy": "fr:Mausolée Mohammed-V (gps:0.2km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 143,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-kasbah-des-oudayas",
+      "type": "activity",
+      "name": "Kasbah des Oudayas",
+      "city": "Rabat",
+      "category": "culture",
+      "description": "Citadelle almohade du XIIe siècle au-dessus du Bou Regreg : ruelles bleu et blanc, jardins andalous, vue sur l'estuaire, café maure. La visite de la kasbah et des jardins est gratuite.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Kasbah et jardins andalous gratuits ; le petit musée des Oudayas peut demander un droit d'entrée modeste (à confirmer sur place).",
+      "priceConfidence": "medium",
+      "duration": 150,
+      "durationBasis": "source",
+      "openingHours": "Accessible en journée ; lumière idéale en fin d'après-midi",
+      "address": "Kasbah des Oudayas, Rabat",
+      "coordinates": {
+        "lat": 34.0316,
+        "lng": -6.8367,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 537 061 338",
+      "touristLevel": "medium",
+      "tags": [
+        "kasbah",
+        "jardin",
+        "vue",
+        "gratuit",
+        "photo"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.3,
+      "notes": null,
+      "sources": [
+        "https://www.serenitymoroccotours.com/blog/kasbah-des-oudayas-rabat",
+        "https://thetravelingtaylors.world/morocco/rabat-kasbahs-of-the-udayas-2026/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kasbah_Oudayas_exterior.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kasbah_Oudayas_exterior.jpg?width=400",
+        "credit": "Davide Cesare Veniani",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kasbah_Oudayas_exterior.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Kasbah_of_the_Udayas",
+        "matchedBy": "en:Kasbah of the Udayas (gps:0.2km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 164,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-chellah",
+      "type": "activity",
+      "name": "Chellah",
+      "city": "Rabat",
+      "category": "histoire",
+      "description": "Site fortifié avec ruines romaines de Sala et nécropole mérinide, minaret médiéval, jardins et cigognes.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Tarif et horaires non trouvés : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 90,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Chellah, Rabat",
+      "coordinates": {
+        "lat": 34.0068,
+        "lng": -6.8228,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 537 280 513",
+      "touristLevel": "medium",
+      "tags": [
+        "ruines",
+        "jardin",
+        "histoire",
+        "calme"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.4,
+      "notes": null,
+      "sources": [
+        "https://www.expedia.com/cn/Harhoura.dx6177054",
+        "https://citytoursmorocco.com/rabat-museums-galleries-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Roman_Ruins_Zawiya_Chellah_Rabat_Nov25_A7CR_08989.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Roman_Ruins_Zawiya_Chellah_Rabat_Nov25_A7CR_08989.jpg?width=400",
+        "credit": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would much appreciate if you send me an email tagooty@yahoo.com or write on my talk page, for my information. Please contact me before commercial use. Please do not upload an edited image here without consulting me. I would like to make corrections only at my own source to ensure that the changes improve the image and are preserved.Otherwise you may upload an edited image with a new name. Please use one of the templates derivative or extract.",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Roman_Ruins_Zawiya_Chellah_Rabat_Nov25_A7CR_08989.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Chellah",
+        "matchedBy": "en:Chellah (gps:0.2km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 134,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-musee-mohammed-vi-d-art-moderne-et-contemporain",
+      "type": "activity",
+      "name": "Musée Mohammed VI d'art moderne et contemporain",
+      "city": "Rabat",
+      "category": "culture",
+      "description": "Premier musée public marocain dédié à l'art moderne et contemporain (ouvert en 2014) : un siècle de peinture et de sculpture marocaines, grandes expositions temporaires.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Tarif variable selon les expositions : à confirmer à l'arrivée.",
+      "priceConfidence": "low",
+      "duration": 75,
+      "durationBasis": "source",
+      "openingHours": "Lun et mer-dim ≈10h00-18h00 ; fermé le mardi",
+      "address": "2 Avenue Moulay Hassan, quartier Hassan, Rabat",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 759 406",
+      "touristLevel": "low",
+      "tags": [
+        "musée",
+        "art",
+        "expositions"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 3.8,
+      "notes": null,
+      "sources": [
+        "https://citytoursmorocco.com/rabat-museums-galleries-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=400",
+        "credit": "Holger Uwe Schmitt",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%22Eine_beeindruckende_Festung%22._09.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Rabat",
+        "matchedBy": "en:Rabat (gps:1.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 85,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-musee-de-l-histoire-et-des-civilisations",
+      "type": "activity",
+      "name": "Musée de l'Histoire et des Civilisations",
+      "city": "Rabat",
+      "category": "histoire",
+      "description": "Musée d'archéologie de Rabat : bronzes romains de Volubilis (buste de Juba II, chien de Volubilis), collections de la préhistoire à l'époque islamique.",
+      "price": 20,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "≈20 MAD (approximatif, mi-2026).",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "source",
+      "openingHours": "≈10h00-18h00 ; fermé le mardi",
+      "address": "23 Rue Al Brihi, Rabat",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 381 021",
+      "touristLevel": "low",
+      "tags": [
+        "musée",
+        "archéologie",
+        "histoire"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.2,
+      "notes": null,
+      "sources": [
+        "https://citytoursmorocco.com/rabat-museums-galleries-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mus%C3%A9e_de_l'histoire%2C_Rabat_(2).jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mus%C3%A9e_de_l'histoire%2C_Rabat_(2).jpg?width=400",
+        "credit": "ArnoldBetten",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mus%C3%A9e_de_l'histoire%2C_Rabat_(2).jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Museum_of_History_and_Civilizations",
+        "matchedBy": "en:Museum of History and Civilizations (gps:0.7km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 86,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-villa-des-arts-de-rabat",
+      "type": "activity",
+      "name": "Villa des Arts de Rabat",
+      "city": "Rabat",
+      "category": "culture",
+      "description": "Galerie d'une fondation, dans une villa restaurée : expositions d'art contemporain souvent gratuites.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "« Généralement gratuit » selon une source : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 45,
+      "durationBasis": "estimate",
+      "openingHours": "Journée ; souvent fermé le lundi (à vérifier)",
+      "address": "Rabat (Ville nouvelle)",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 159 262",
+      "touristLevel": "low",
+      "tags": [
+        "galerie",
+        "art",
+        "gratuit"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://citytoursmorocco.com/rabat-museums-galleries-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=400",
+        "credit": "Holger Uwe Schmitt",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%22Eine_beeindruckende_Festung%22._09.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Rabat",
+        "matchedBy": "en:Rabat (gps:1.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 87,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-tour-mohammed-vi-observatoire",
+      "type": "activity",
+      "name": "Tour Mohammed VI (observatoire)",
+      "city": "Rabat",
+      "category": "culture",
+      "description": "Nouvelle tour de 250 m, présentée comme la plus haute du Maroc, avec panorama sur la ville. Nouveauté 2026.",
+      "price": 250,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "≈250 MAD d'après une seule source (blog, août 2026), réservation en ligne : à vérifier avant de planifier.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Rabat / Salé",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 824 949",
+      "touristLevel": "medium",
+      "tags": [
+        "panorama",
+        "nouveauté"
+      ],
+      "requiresBooking": true,
+      "popularity": null,
+      "rating": 3.9,
+      "notes": null,
+      "sources": [
+        "https://www.sallykirby.com/blog/15-things-to-do-in-rabat"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Burg_Mohammed_6.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Burg_Mohammed_6.jpg?width=400",
+        "credit": "RG TLV",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Burg_Mohammed_6.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/Tour_Mohammed-VI",
+        "matchedBy": "fr:Tour Mohammed-VI (gps:1.5km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 81,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-medina-et-souks-de-marrakech",
+      "type": "activity",
+      "name": "Médina et souks de Marrakech",
+      "city": "Marrakech",
+      "category": "medina",
+      "description": "Labyrinthe de ruelles autour de Jemaa el-Fna, classé à l'UNESCO : souk Smata (babouches), Cherratine (cuir), Zrabia (tapis, céramique), Attatine (épices). Négocier les prix.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Entrée libre. Les achats se négocient ; prévoir de la monnaie.",
+      "priceConfidence": "medium",
+      "duration": 150,
+      "durationBasis": "estimate",
+      "openingHours": "Boutiques généralement ouvertes de la matinée jusqu'en soirée ; horaires variables selon les échoppes",
+      "address": "Médina, au nord de Jemaa el-Fna, Marrakech",
+      "coordinates": {
+        "lat": 31.63,
+        "lng": -7.988,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 524 718 568",
+      "touristLevel": "high",
+      "tags": [
+        "médina",
+        "souks",
+        "shopping",
+        "artisanat",
+        "gratuit",
+        "marchandage"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://all.accor.com/a/fr/limitless/thematics/family/marrakech-en-famille.html",
+        "https://www.nomadicmatt.com/travel-guides/morocco-travel-guide/marrakesh/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=400",
+        "credit": "Acp",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pavillon_Menarag%C3%A4rten.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Marrakesh",
+        "matchedBy": "en:Marrakesh (gps:2.0km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 202,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-oasiria-water-park",
+      "type": "activity",
+      "name": "Oasiria Water Park",
+      "city": "Marrakech",
+      "category": "parc-attractions",
+      "description": "Parc aquatique en bordure de Marrakech : piscine à vagues, toboggans, rivière lente, jardin d'oliviers. Idéal pour se rafraîchir en été.",
+      "price": 300,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "≈300 MAD adulte ou enfant de plus de 1,50 m ; ≈200 MAD enfants de moins de 1,50 m et seniors +65 ans (source 2026). Billet en ligne ≈32 USD sur Expedia. Fermeture saisonnière : vérifier les dates.",
+      "priceConfidence": "medium",
+      "duration": 300,
+      "durationBasis": "estimate",
+      "openingHours": "10h00-18h00 ; ouvert d'avril à fin octobre (selon une source 2026)",
+      "address": "Route d'Amizmiz, km 4, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 192 943",
+      "touristLevel": "medium",
+      "tags": [
+        "aquatique",
+        "famille",
+        "été",
+        "détente"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://www.vanupied.com/marrakech/parcs-marrakech/6-lieux-ou-se-baigner-a-marrakech-piscine-parc-aquatique-ou-lac.html",
+        "https://www.expedia.com/zh/things-to-do/marrakech-oasiria-water-park-entrance-ticket.a4552838.activity-details"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 112,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-aqua-mirage-aquaparc",
+      "type": "activity",
+      "name": "Aqua Mirage Aquaparc",
+      "city": "Marrakech",
+      "category": "parc-attractions",
+      "description": "Grand parc aquatique à environ 20 minutes du centre : nombreux toboggans, tubes et structures pour enfants.",
+      "price": 400,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "≈400 MAD la journée (déjeuner inclus) ou ≈250 MAD la demi-journée ; enfants de moins de 1,50 m et seniors ≈240 MAD. Source unique : à confirmer.",
+      "priceConfidence": "low",
+      "duration": 300,
+      "durationBasis": "estimate",
+      "openingHours": "Tous les jours 10h00-18h00 (selon une source 2026)",
+      "address": "Km 5, Route de Tahanaout, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 580 471",
+      "touristLevel": "low",
+      "tags": [
+        "aquatique",
+        "famille",
+        "été"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.8,
+      "notes": null,
+      "sources": [
+        "https://www.vanupied.com/marrakech/parcs-marrakech/6-lieux-ou-se-baigner-a-marrakech-piscine-parc-aquatique-ou-lac.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 85,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-jardins-de-la-menara",
+      "type": "activity",
+      "name": "Jardins de la Ménara",
+      "city": "Marrakech",
+      "category": "parc",
+      "description": "Vaste jardin d'oliviers avec grand bassin et pavillon, devant la chaîne de l'Atlas : la carte postale classique de Marrakech, agréable au coucher du soleil.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Entrée gratuite en 2023 selon la source ; méfiance envers les personnes qui demandent de l'argent à l'entrée. Accès en bus 11 et 18 depuis la médina.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": "Tous les jours, ≈8h00-19h00 (horaire à confirmer)",
+      "address": "À l'ouest d'Hivernage, Marrakech",
+      "coordinates": {
+        "lat": 31.6122,
+        "lng": -8.0187,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 524 397 223",
+      "touristLevel": "medium",
+      "tags": [
+        "jardin",
+        "balade",
+        "gratuit",
+        "coucher-de-soleil",
+        "photo"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 3.8,
+      "notes": null,
+      "sources": [
+        "https://www.vanupied.com/marrakech/parcs-marrakech/jardin-de-la-menara-a-marrakech-carte-postale-a-eviter-ouest.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pavillon_Menarag%C3%A4rten.jpg?width=400",
+        "credit": "Acp",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pavillon_Menarag%C3%A4rten.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Marrakesh",
+        "matchedBy": "en:Marrakesh (gps:2.2km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 89,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-zoo-d-ain-sebaa",
+      "type": "activity",
+      "name": "Zoo d'Aïn Sebaâ",
+      "city": "Casablanca",
+      "category": "zoo",
+      "description": "Parc zoologique historique de Casablanca, entièrement rénové et rouvert le 30 décembre 2025 : trois aires (Afrique, Asie, Amérique), ferme pédagogique, 13 hectares.",
+      "price": 80,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "80 MAD (12 ans et plus), 50 MAD enfants et étudiants ; tarifs famille prévus ; parking 15 MAD. Augmentation prévue plus tard selon le contrat. Le nombre d'espèces varie selon les sources (45+ à ≈100).",
+      "priceConfidence": "medium",
+      "duration": 150,
+      "durationBasis": "estimate",
+      "openingHours": "Horaires non trouvés : à vérifier",
+      "address": "Aïn Sebaâ, Casablanca",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 522 638 935",
+      "touristLevel": "low",
+      "tags": [
+        "zoo",
+        "famille",
+        "animaux",
+        "réouverture"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://ledesk.ma/encontinu/casablanca-le-zoo-de-ain-sebaa-rouvrira-ses-portes-au-public-le-mardi-30-decembre/",
+        "https://snrtnews.com/fr/article/ain-sebaa-un-zoo-renove-aux-normes-internationales-avec-100-especes-143867",
+        "https://www.bladi.net/zoo-casablanca-reouverture-qui-fache,111752.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Football_Ain_Sebaa.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Football_Ain_Sebaa.jpg?width=400",
+        "credit": "Joshua Segal",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Football_Ain_Sebaa.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/A%C3%AFn_Seba%C3%A2",
+        "matchedBy": "fr:Aïn Sebaâ (gps:7.4km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 27,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-parc-sindibad",
+      "type": "activity",
+      "name": "Parc Sindibad",
+      "city": "Casablanca",
+      "category": "parc-attractions",
+      "description": "Grand parc de loisirs de 32 hectares sur la Corniche d'Aïn Diab : plus de 20 attractions (montagnes russes, kart, cinéma 9D) et petit parc animalier. Accès par bracelet.",
+      "price": 75,
+      "priceRange": [
+        75,
+        270
+      ],
+      "priceUnit": "MAD/adulte (bracelet)",
+      "priceNote": "Accès par bracelet (2026, une seule source détaillée) : Fun ≈75 MAD adulte / 70 enfant (18 attractions) ; Extra Fun ≈140 / 130 (23 attractions) ; VIP ≈270 / 260 (toutes + 5 jetons VR). Attractions hors bracelet à l'unité ≈15-50 MAD ; paintball ≈100-150 MAD ; kart ≈200 MAD les 10 min. Zoo inclus dans l'entrée. Avis récents mitigés (attractions parfois hors service) et parc en cours de reprise (Pickalbatros) : vérifier sur parcsindibad.ma ou @sindibadparcofficiel.",
+      "priceConfidence": "medium",
+      "duration": 240,
+      "durationBasis": "estimate",
+      "openingHours": "Mer-ven 10h-19h ; sam-dim 11h-20h ; juillet-août 12h-21h ; fermé lundi-mardi et pendant le Ramadan (selon une source 2026 : horaires variables)",
+      "address": "Boulevard de l'Océan Atlantique (Sidi Abderrahmane), Corniche d'Aïn Diab, Casablanca",
+      "coordinates": null,
+      "website": "https://www.parcsindibad.ma/",
+      "phone": "+212 522 796 862",
+      "touristLevel": "medium",
+      "tags": [
+        "famille",
+        "attractions",
+        "zoo",
+        "corniche"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.6,
+      "notes": null,
+      "sources": [
+        "https://guide-casa.ma/lieu/parc-sindibad/",
+        "https://www.parcsindibad.ma/",
+        "https://activityz.ma/casablanca/parc-sindibad/",
+        "https://medias24.com/2026/05/06/parc-sindibad-le-reset-financier-qui-prepare-larrivee-de-legyptien-pickalbatros-1672051/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Casa_finance_city_6_(cropped).jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Casa_finance_city_6_(cropped).jpg?width=400",
+        "credit": "Chah.salah",
+        "license": "CC0",
+        "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Casa_finance_city_6_(cropped).jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Casablanca",
+        "matchedBy": "en:Casablanca (gps:7.2km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 140,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount"
+      ]
+    },
+    {
+      "id": "casablanca-tamaris-aquaparc",
+      "type": "activity",
+      "name": "Tamaris Aquaparc",
+      "city": "Casablanca",
+      "category": "parc-attractions",
+      "description": "Parc aquatique en bord d'Atlantique (7,5 ha) : toboggans géants, rivière paresseuse, piscine à vagues, zone enfants, accès à la plage. Ouvert seulement l'été.",
+      "price": 230,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte (12 ans et +)",
+      "priceNote": "230 MAD adulte (12 ans et +), 150 MAD enfant (80 cm-11 ans), gratuit sous 80 cm ; toutes les attractions incluses (2026, source unique détaillée). Billets en ligne sur tamaris-aquaparc.com. Saison 2026 : 29 mai-6 septembre, donc FERMÉ à la date de ce fichier (23/09/2026) ; réouverture généralement fin mai. Aliments extérieurs interdits ; parking gratuit.",
+      "priceConfidence": "medium",
+      "duration": 300,
+      "durationBasis": "estimate",
+      "openingHours": "10h00-18h30 (attractions aquatiques jusqu'à 18h00) ; saison 29 mai-6 sept 2026 uniquement",
+      "address": "Route d'Azemmour (N1), km 15, Dar Bouazza (à ≈20-30 min de Casablanca)",
+      "coordinates": {
+        "lat": 33.5225,
+        "lng": -7.7843,
+        "precision": "source"
+      },
+      "website": "https://tamaris-aquaparc.com",
+      "phone": "+212 522 676 182",
+      "touristLevel": "medium",
+      "tags": [
+        "aquatique",
+        "famille",
+        "été"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.1,
+      "notes": null,
+      "sources": [
+        "https://guide-casa.ma/article/tamaris-aquaparc-billets-prix-horaires/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 179,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-ancienne-medina-de-casablanca",
+      "type": "activity",
+      "name": "Ancienne médina de Casablanca",
+      "city": "Casablanca",
+      "category": "medina",
+      "description": "Vieille ville fortifiée de Casablanca, à l'entrée marquée par la tour de l'horloge : labyrinthe de ruelles et souks. Plus modeste que les médinas de Marrakech ou Fès.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 90,
+      "durationBasis": "estimate",
+      "openingHours": "Marché animé en journée",
+      "address": "Ancienne médina, Casablanca",
+      "coordinates": {
+        "lat": 33.6,
+        "lng": -7.615,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 522 520 442",
+      "touristLevel": "low",
+      "tags": [
+        "médina",
+        "souk",
+        "gratuit",
+        "histoire"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://www.holidify.com/places/casablanca/sightseeing-and-things-to-do.html",
+        "https://www.gateway2morocco.com/casablanca-travel-guide"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Casablanca_1900_by_Felix_Weisgerber.png?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Casablanca_1900_by_Felix_Weisgerber.png?width=400",
+        "credit": "Felix Weisgerber",
+        "license": "Public domain",
+        "licenseUrl": null,
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Casablanca_1900_by_Felix_Weisgerber.png",
+        "status": "auto-review",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Medina_of_Casablanca",
+        "matchedBy": "en:Medina of Casablanca (text)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 38,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-parc-de-la-ligue-arabe",
+      "type": "activity",
+      "name": "Parc de la Ligue Arabe",
+      "city": "Casablanca",
+      "category": "parc",
+      "description": "Grand parc urbain avec allées de promenade, près de la cathédrale du Sacré-Cœur. Agréable pour une pause en famille.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Tarif non confirmé : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Boulevard Moulay Youssef, Casablanca",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 522 401 024",
+      "touristLevel": "low",
+      "tags": [
+        "parc",
+        "famille",
+        "balade"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.6,
+      "notes": null,
+      "sources": [
+        "https://marocmama.com/?p=33874"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Arab_League_Park%2C_Casablanca%3B_%D8%AD%D8%AF%D9%8A%D9%82%D8%A9_%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9%D8%A9_%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9%D8%8C_%D8%A7%D9%84%D8%AF%D8%A7%D8%B1_%D8%A7%D9%84%D8%A8%D9%8A%D8%B6%D8%A7%D8%A1.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Arab_League_Park%2C_Casablanca%3B_%D8%AD%D8%AF%D9%8A%D9%82%D8%A9_%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9%D8%A9_%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9%D8%8C_%D8%A7%D9%84%D8%AF%D8%A7%D8%B1_%D8%A7%D9%84%D8%A8%D9%8A%D8%B6%D8%A7%D8%A1.jpg?width=400",
+        "credit": "Petar Milošević",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Arab_League_Park%2C_Casablanca%3B_%D8%AD%D8%AF%D9%8A%D9%82%D8%A9_%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9%D8%A9_%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9%D8%8C_%D8%A7%D9%84%D8%AF%D8%A7%D8%B1_%D8%A7%D9%84%D8%A8%D9%8A%D8%B6%D8%A7%D8%A1.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Arab_League_Park",
+        "matchedBy": "en:Arab League Park (gps:0.4km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 27,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-jardin-zoologique-national-de-rabat",
+      "type": "activity",
+      "name": "Jardin Zoologique National de Rabat",
+      "city": "Rabat",
+      "category": "zoo",
+      "description": "Zoo de 2012 organisé en cinq écosystèmes (Atlas, savane, désert, forêt tropicale, zones humides) : plus de 2 000 animaux et environ 170 espèces, programmes de conservation.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Tarif actuel non trouvé (le tarif d'ouverture en 2012 était de 50 MAD adulte / 30 MAD enfant, donc périmé). Réduction avec un billet de train ONCF de moins de 15 jours (Rabat, Salé, Témara).",
+      "priceConfidence": "low",
+      "duration": 180,
+      "durationBasis": "estimate",
+      "openingHours": "Horaires non trouvés : à vérifier",
+      "address": "Ain Attig, près de Témara (banlieue de Rabat)",
+      "coordinates": {
+        "lat": 33.953,
+        "lng": -6.895,
+        "precision": "approx"
+      },
+      "website": "https://www.rabatzoo.ma/",
+      "phone": "+212 537 198 743",
+      "touristLevel": "medium",
+      "tags": [
+        "zoo",
+        "famille",
+        "animaux",
+        "conservation"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://www.rabatzoo.ma/",
+        "https://fr.hespress.com/485560-les-enfants-maqdessis-sinitient-a-la-biodiversite-au-zoo-de-rabat.html",
+        "https://snrtnews.com/fr/article/le-zoo-de-rabat-et-loncf-scellent-un-partenariat-strategique-131143",
+        "https://en.wikipedia.com/wiki/Rabat_Zoo"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rabat_Zoo_Logo.png?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Rabat_Zoo_Logo.png?width=400",
+        "credit": "Le jardin zoologique de Rabat",
+        "license": "Public domain",
+        "licenseUrl": null,
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rabat_Zoo_Logo.png",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Rabat_Zoo",
+        "matchedBy": "en:Rabat Zoo (gps:0.0km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 123,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-medina-de-rabat-et-rue-des-consuls",
+      "type": "activity",
+      "name": "Médina de Rabat et rue des Consuls",
+      "city": "Rabat",
+      "category": "medina",
+      "description": "Ancienne médina de Rabat : ruelles, boutiques et artisans, rue des Consuls réputée pour l'artisanat. Plus calme et plus authentique que dans les grandes villes touristiques.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 120,
+      "durationBasis": "estimate",
+      "openingHours": "Boutiques ouvertes en journée",
+      "address": "Médina, Rabat",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 732 941",
+      "touristLevel": "low",
+      "tags": [
+        "médina",
+        "souk",
+        "artisanat",
+        "gratuit"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.3,
+      "notes": null,
+      "sources": [
+        "https://www.expedia.com/Rabat-Ocean.dx553248633981723822",
+        "https://www.visitrabat.com/en/lieux/le-ziryab-2/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=400",
+        "credit": "Holger Uwe Schmitt",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%22Eine_beeindruckende_Festung%22._09.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Rabat",
+        "matchedBy": "en:Rabat (gps:1.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 15,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-jardin-d-essais-botaniques",
+      "type": "activity",
+      "name": "Jardin d'Essais Botaniques",
+      "city": "Rabat",
+      "category": "parc",
+      "description": "Jardin créé en 1914 au centre de Rabat : plus de 1 200 espèces végétales sur 17 hectares, allées ombragées et zones humides.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Tarif et horaires non trouvés : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 75,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Centre de Rabat",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 815 090",
+      "touristLevel": "low",
+      "tags": [
+        "jardin",
+        "calme",
+        "photo",
+        "balade"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.4,
+      "notes": null,
+      "sources": [
+        "https://telquel.ma/2025/11/04/decouverte-six-jardins-marocains-qui-defient-limaginaire_1959390"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Jardin_essais_botaniques_Rabat_Maroc_1-photo_bertrand_SOUBEYRAND.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Jardin_essais_botaniques_Rabat_Maroc_1-photo_bertrand_SOUBEYRAND.jpg?width=400",
+        "credit": "Bertrand SOUBEYRAND",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jardin_essais_botaniques_Rabat_Maroc_1-photo_bertrand_SOUBEYRAND.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/Jardin_d'essais_botaniques_de_Rabat",
+        "matchedBy": "fr:Jardin d'essais botaniques de Rabat (gps:2.0km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 83,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-plage-de-rabat",
+      "type": "activity",
+      "name": "Plage de Rabat",
+      "city": "Rabat",
+      "category": "plage",
+      "description": "Plage de la ville au pied de la médina et de l'estuaire ; la plage de Dahomey est citée par Expedia pour se baigner et bronzer.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Source très légère : conditions d'accès et sécurité de baignade à vérifier.",
+      "priceConfidence": "low",
+      "duration": 120,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Rabat (littoral)",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 332 838",
+      "touristLevel": "low",
+      "tags": [
+        "plage",
+        "mer",
+        "détente"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.5,
+      "notes": null,
+      "sources": [
+        "https://www.expedia.com/Rabat.dx6084754",
+        "https://za.hotels.com/de1673962/hotels-near-chellah-rabat-morocco"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sidi_Bouknadel_Commune_House.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sidi_Bouknadel_Commune_House.jpg?width=400",
+        "credit": "Anass Sedrati",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sidi_Bouknadel_Commune_House.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Bouknadel",
+        "matchedBy": "en:Bouknadel (gps:15.4km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 32,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-cyber-parc-arsat-moulay-abdeslam",
+      "type": "activity",
+      "name": "Cyber Parc Arsat Moulay Abdeslam",
+      "city": "Marrakech",
+      "category": "parc",
+      "description": "Parc de 8 hectares à quelques centaines de mètres de Jemaa el-Fna, ancien jardin royal du XVIIIe siècle transformé en « jardin électronique » avec Wi-Fi gratuit. Ombre, bancs, allées de palmiers et d'orangers.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Entrée gratuite (plusieurs sources).",
+      "priceConfidence": "medium",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": "Tous les jours ≈7h00-19h00",
+      "address": "Entre la médina et Guéliz, près de la Koutoubia, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 669 652",
+      "touristLevel": "low",
+      "tags": [
+        "parc",
+        "balade",
+        "gratuit",
+        "calme",
+        "wifi",
+        "ombre"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.4,
+      "notes": null,
+      "sources": [
+        "https://visitmarrakech.com/en/listing/cyber-parc-arsat-moulay-abdeslam",
+        "https://timetomomo.com/nl/de-mooiste-parken-in-marrakech",
+        "https://www.vanupied.com/marrakech/parcs-marrakech/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Marrakech_Biennale_6_-_logo.JPG?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Marrakech_Biennale_6_-_logo.JPG?width=400",
+        "credit": "Marrakech Biennale",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Marrakech_Biennale_6_-_logo.JPG",
+        "status": "auto-review",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Marrakech_Biennale",
+        "matchedBy": "en:Marrakech Biennale (text)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 29,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-parc-lalla-hasna-parc-de-la-koutoubia",
+      "type": "activity",
+      "name": "Parc Lalla Hasna (parc de la Koutoubia)",
+      "city": "Marrakech",
+      "category": "parc",
+      "description": "Jardin ombragé avec palmiers, orangers, bassins et fontaines, à deux pas de la mosquée Koutoubia. Bon endroit pour un pique-nique ou une pause loin de l'agitation de la médina.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Entrée gratuite. Horaires non trouvés.",
+      "priceConfidence": "medium",
+      "duration": 45,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Près de la mosquée Koutoubia, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 802 619",
+      "touristLevel": "low",
+      "tags": [
+        "parc",
+        "balade",
+        "gratuit",
+        "pique-nique",
+        "ombre"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.1,
+      "notes": null,
+      "sources": [
+        "https://www.vanupied.com/marrakech/parcs-marrakech/",
+        "https://timetomomo.com/nl/de-mooiste-parken-in-marrakech"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kutubiyya_Mosque%2C_2010.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kutubiyya_Mosque%2C_2010.jpg?width=400",
+        "credit": "Rol1000",
+        "license": "GFDL",
+        "licenseUrl": "http://www.gnu.org/copyleft/fdl.html",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kutubiyya_Mosque%2C_2010.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/Mosqu%C3%A9e_Koutoubia",
+        "matchedBy": "fr:Mosquée Koutoubia (gps:0.7km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 25,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-parc-el-harti",
+      "type": "activity",
+      "name": "Parc El Harti",
+      "city": "Marrakech",
+      "category": "parc",
+      "description": "Parc de quartier de Guéliz, sur la place du 16 Novembre, peu connu des touristes.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Gratuité non confirmée explicitement par la source : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 45,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Place du 16 Novembre, Guéliz, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 843 411",
+      "touristLevel": "low",
+      "tags": [
+        "parc",
+        "balade",
+        "gratuit",
+        "Guéliz",
+        "local"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.3,
+      "notes": null,
+      "sources": [
+        "https://timetomomo.com/nl/de-mooiste-parken-in-marrakech"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Marokko0112_(retouched).jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Marokko0112_(retouched).jpg?width=400",
+        "credit": "Rol1000",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Marokko0112_(retouched).jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/Marrakech",
+        "matchedBy": "fr:Marrakech (gps:0.8km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 15,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-remparts-kasbah-et-mellah-a-pied",
+      "type": "activity",
+      "name": "Remparts, Kasbah et Mellah à pied",
+      "city": "Marrakech",
+      "category": "promenade",
+      "description": "Balade gratuite à pied le long des remparts, dans le quartier de la Kasbah et dans le Mellah (ancien quartier juif), loin des grands axes touristiques.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Les palais et tombeaux (Bahia, El Badi, Saadiens) sont payants : seule la promenade extérieure est gratuite.",
+      "priceConfidence": "medium",
+      "duration": 120,
+      "durationBasis": "estimate",
+      "openingHours": "Balade en extérieur, en journée de préférence",
+      "address": "Kasbah et Mellah, sud de la médina, Marrakech",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 524 864 849",
+      "touristLevel": "low",
+      "tags": [
+        "balade",
+        "gratuit",
+        "histoire",
+        "médina",
+        "remparts"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.6,
+      "notes": null,
+      "sources": [
+        "https://www.airalo.com/fr/blog/que-visiter-a-marrakech-gratuitement"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Djemaa_el_Fna.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Djemaa_el_Fna.jpg?width=400",
+        "credit": "Boris Macek",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Djemaa_el_Fna.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/M%C3%A9dina_de_Marrakech",
+        "matchedBy": "fr:Médina de Marrakech (gps:0.4km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 83,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-plage-d-ain-diab",
+      "type": "activity",
+      "name": "Plage d'Aïn Diab",
+      "city": "Casablanca",
+      "category": "plage",
+      "description": "Grande plage de sable fin de Casablanca, très fréquentée l'été, ouverte sur la Corniche. Des zones de baignade libres existent, plus loin des clubs privés.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Accès libre aux zones publiques ; les clubs de plage privés de la Corniche sont payants (≈50-150 MAD selon la saison). Label Pavillon bleu attribué il y a plusieurs années : état actuel non vérifié.",
+      "priceConfidence": "low",
+      "duration": 120,
+      "durationBasis": "estimate",
+      "openingHours": "Accessible en continu ; ambiance surtout de juin à début septembre",
+      "address": "Corniche d'Aïn Diab, Casablanca",
+      "coordinates": {
+        "lat": 33.5926,
+        "lng": -7.675,
+        "precision": "approx"
+      },
+      "website": null,
+      "phone": "+212 522 072 707",
+      "touristLevel": "medium",
+      "tags": [
+        "plage",
+        "mer",
+        "gratuit",
+        "été",
+        "balade"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.8,
+      "notes": null,
+      "sources": [
+        "https://aujourdhui.ma/?p=124224",
+        "https://www.barcelo.com/guia-turismo/fr/maroc/casablanca/a-voir-et-a-faire/casablanca-avec-des-amis/",
+        "https://guide-casa.ma/article/tamaris-aquaparc-billets-prix-horaires/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Boulevard_de_la_Corniche%2C_Dar-el-Beida%2C_Morocco_-_panoramio_(13).jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Boulevard_de_la_Corniche%2C_Dar-el-Beida%2C_Morocco_-_panoramio_(13).jpg?width=400",
+        "credit": "Patrick Nouhailler's…",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Boulevard_de_la_Corniche%2C_Dar-el-Beida%2C_Morocco_-_panoramio_(13).jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/A%C3%AFn_Diab",
+        "matchedBy": "fr:Aïn Diab (gps:1.5km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 137,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-place-des-nations-unies",
+      "type": "activity",
+      "name": "Place des Nations Unies",
+      "city": "Casablanca",
+      "category": "place",
+      "description": "Grande place du centre de Casablanca, entourée d'architecture des années 1930 : bonne étape pour sentir l'ambiance de la rue, avec la place Mohammed V.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "medium",
+      "duration": 45,
+      "durationBasis": "estimate",
+      "openingHours": "Espace public, en continu",
+      "address": "Place des Nations Unies, Casablanca",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 522 192 619",
+      "touristLevel": "low",
+      "tags": [
+        "place",
+        "architecture",
+        "gratuit",
+        "balade",
+        "centre-ville"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.2,
+      "notes": null,
+      "sources": [
+        "https://www.barcelo.com/guia-turismo/fr/maroc/casablanca/a-voir-et-a-faire/casablanca-avec-des-amis/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Downtown%2C_Casablanca.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Downtown%2C_Casablanca.jpg?width=400",
+        "credit": "Achalhikarim",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Downtown%2C_Casablanca.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/United_Nations_Square_(Casablanca)",
+        "matchedBy": "en:United Nations Square (Casablanca) (gps:0.6km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 82,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-marina-du-bou-regreg-promenade",
+      "type": "activity",
+      "name": "Marina du Bou Regreg (promenade)",
+      "city": "Rabat",
+      "category": "promenade",
+      "description": "Promenade au bord du Bou Regreg entre Rabat et Salé : vue sur la kasbah des Oudayas et la tour Hassan, restaurants en terrasse. Les activités nautiques (kayak, bateau, paddle) sont payantes.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Balade gratuite ; activités nautiques et traversées en barque payantes (tarifs non collectés).",
+      "priceConfidence": "medium",
+      "duration": 90,
+      "durationBasis": "estimate",
+      "openingHours": "Promenade accessible en continu",
+      "address": "Marina du Bou Regreg, Rabat-Salé",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 457 502",
+      "touristLevel": "medium",
+      "tags": [
+        "promenade",
+        "fleuve",
+        "gratuit",
+        "vue",
+        "coucher-de-soleil"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.1,
+      "notes": null,
+      "sources": [
+        "https://medias24.com/2025/06/16/tourisme-que-faire-a-rabat-en-48-heures/",
+        "https://www.expedia.com/Rabat.dx6084754"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 93,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-parc-hassan-ii",
+      "type": "activity",
+      "name": "Parc Hassan II",
+      "city": "Rabat",
+      "category": "parc",
+      "description": "Grand parc de Rabat où l'on peut se promener ou s'allonger sur l'herbe.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": "Gratuité et horaires non confirmés explicitement : à vérifier.",
+      "priceConfidence": "low",
+      "duration": 60,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Rabat",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 876 716",
+      "touristLevel": "low",
+      "tags": [
+        "parc",
+        "balade",
+        "pique-nique",
+        "gratuit"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.8,
+      "notes": null,
+      "sources": [
+        "https://medias24.com/2025/06/16/tourisme-que-faire-a-rabat-en-48-heures/"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=400",
+        "credit": "Holger Uwe Schmitt",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%22Eine_beeindruckende_Festung%22._09.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Rabat",
+        "matchedBy": "en:Rabat (gps:1.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 58,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-place-bab-el-had",
+      "type": "activity",
+      "name": "Place Bab El Had",
+      "city": "Rabat",
+      "category": "place",
+      "description": "Place et porte de la médina de Rabat, point de départ naturel des balades vers la rue des Consuls et le marché.",
+      "price": 0,
+      "priceRange": null,
+      "priceUnit": "MAD/adulte étranger",
+      "priceNote": null,
+      "priceConfidence": "low",
+      "duration": 30,
+      "durationBasis": "estimate",
+      "openingHours": "Espace public, en continu",
+      "address": "Bab El Had, Rabat",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 078 509",
+      "touristLevel": "medium",
+      "tags": [
+        "place",
+        "médina",
+        "gratuit",
+        "balade"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://www.expedia.com/Rabat.dx6084754",
+        "https://www.expedia.co.in/Rabat.dx6084754"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": true,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%22Eine_beeindruckende_Festung%22._09.jpg?width=400",
+        "credit": "Holger Uwe Schmitt",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%22Eine_beeindruckende_Festung%22._09.jpg",
+        "status": "auto",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Rabat",
+        "matchedBy": "en:Rabat (gps:1.1km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 200,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-plage-de-harhoura",
+      "type": "activity",
+      "name": "Plage de Harhoura",
+      "city": "Rabat",
+      "category": "plage",
+      "description": "Plage du littoral proche de Rabat, citée avec la plage de Dahomey pour se baigner et bronzer.",
+      "price": null,
+      "priceRange": null,
+      "priceUnit": null,
+      "priceNote": "Source très légère : accès, prix éventuels des clubs et sécurité de baignade à vérifier.",
+      "priceConfidence": "low",
+      "duration": 150,
+      "durationBasis": "estimate",
+      "openingHours": null,
+      "address": "Harhoura, littoral proche de Rabat",
+      "coordinates": null,
+      "website": null,
+      "phone": "+212 537 982 970",
+      "touristLevel": "low",
+      "tags": [
+        "plage",
+        "mer",
+        "détente"
+      ],
+      "requiresBooking": false,
+      "popularity": null,
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://www.expedia.com/Rabat.dx6084754"
+      ],
+      "lastChecked": "2026-09-23",
+      "isFree": false,
+      "wikipediaTitle": null,
+      "image": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Temara_skhritate_flag.png?width=800",
+        "thumbnailUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Temara_skhritate_flag.png?width=400",
+        "credit": "Moha lopi",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Temara_skhritate_flag.png",
+        "status": "auto",
+        "wikipediaUrl": "https://fr.wikipedia.org/wiki/Pr%C3%A9fecture_de_Skhirate-T%C3%A9mara",
+        "matchedBy": "fr:Préfecture de Skhirate-Témara (gps:14.7km)",
+        "checkedAt": "2026-09-24"
+      },
+      "userRatingCount": 57,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    }
+  ],
+  "restaurants": [
+    {
+      "id": "marrakech-nomad",
+      "type": "restaurant",
+      "name": "Nomad",
+      "city": "Marrakech",
+      "cuisine": "Marocaine moderne",
+      "description": "Rooftop sur la place Rahba Kedima (place aux épices) : plats marocains revisités, ouvert depuis 2014.",
+      "priceLevel": "$$-$$$",
+      "avgPricePerPerson": null,
+      "address": "1 Derb Aarjane, Rahba Lakdima, Médina, Marrakech",
+      "openingHours": "Tous les jours 12h00-23h00",
+      "phone": "+212 5243-81609",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "rooftop",
+        "médina",
+        "moderne"
+      ],
+      "rating": 4.4,
+      "notes": "Réserver la terrasse pour le coucher du soleil.",
+      "sources": [
+        "https://tablejourney.com/morocco/marrakech/restaurants/",
+        "https://isleblue.co/categories/morocco-guide/articles/recommended-restaurants-in-marrakech"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 33,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount"
+      ]
+    },
+    {
+      "id": "marrakech-le-jardin",
+      "type": "restaurant",
+      "name": "Le Jardin",
+      "city": "Marrakech",
+      "cuisine": "Marocaine / bistro",
+      "description": "Oasis verte cachée dans les souks, dans un riad du XVIe siècle.",
+      "priceLevel": "$$",
+      "avgPricePerPerson": null,
+      "address": "32 Souk Jeld Sidi Abdelaziz, Médina, Marrakech",
+      "openingHours": null,
+      "phone": "+212 5243-82725",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "jardin",
+        "médina",
+        "déjeuner"
+      ],
+      "rating": 4.1,
+      "notes": "Selon une source, pas de réservation : arriver avant 13h pour le déjeuner.",
+      "sources": [
+        "https://tablejourney.com/morocco/cuisine/moroccan/",
+        "https://isleblue.co/categories/morocco-guide/articles/recommended-restaurants-in-marrakech"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 203,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount"
+      ]
+    },
+    {
+      "id": "marrakech-al-fassia-gueliz",
+      "type": "restaurant",
+      "name": "Al Fassia Guéliz",
+      "city": "Marrakech",
+      "cuisine": "Marocaine (cuisine de Fès)",
+      "description": "Restaurant tenu par des femmes depuis 1987, réputé pour la pastilla et les tajines.",
+      "priceLevel": "$$$",
+      "avgPricePerPerson": null,
+      "address": "55 Boulevard Mohammed Zerktouni, Guéliz, Marrakech",
+      "openingHours": null,
+      "phone": "+212 524 810 736",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "traditionnel",
+        "Guéliz"
+      ],
+      "rating": 4.5,
+      "notes": "Horaires contradictoires selon les sources (fermeture un jour de la semaine) : à confirmer avant de venir.",
+      "sources": [
+        "https://tablejourney.com/morocco/marrakech/cuisine/moroccan/",
+        "https://www.voyageavecnous.fr/ou-manger-a-marrakech"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 67,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-le-foundouk",
+      "type": "restaurant",
+      "name": "Le Foundouk",
+      "city": "Marrakech",
+      "cuisine": "Marocaine / méditerranéenne",
+      "description": "Ancien caravansérail près de Bab Doukkala, réputé pour sa terrasse.",
+      "priceLevel": "$$$",
+      "avgPricePerPerson": null,
+      "address": "55 Rue du Souk des Fassis, Kat Bennahid, Marrakech",
+      "openingHours": "19h00-00h00 ; fermé le mercredi (selon une source)",
+      "phone": "+212 524 667 506",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "rooftop",
+        "dîner",
+        "médina"
+      ],
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://tablejourney.com/morocco/marrakech/restaurants/"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 72,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-amal-center-gueliz",
+      "type": "restaurant",
+      "name": "Amal Center Guéliz",
+      "city": "Marrakech",
+      "cuisine": "Marocaine",
+      "description": "Restaurant à but non lucratif qui forme des femmes défavorisées à la cuisine : plats marocains simples.",
+      "priceLevel": "$$",
+      "avgPricePerPerson": null,
+      "address": "Rue Allal Ben Ahmed et Rue Ibn Sina, Guéliz, Marrakech",
+      "openingHours": null,
+      "phone": "+212 524 769 956",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "solidaire",
+        "déjeuner",
+        "Guéliz"
+      ],
+      "rating": 3.9,
+      "notes": null,
+      "sources": [
+        "https://tablejourney.com/morocco/marrakech/cuisine/moroccan/",
+        "https://mwnlifestyle.com/?p=5305"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 81,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-l-mida",
+      "type": "restaurant",
+      "name": "L'Mida",
+      "city": "Marrakech",
+      "cuisine": "Marocaine moderne",
+      "description": "Deux niveaux au-dessus de Rahba Kedima, vue sur l'Atlas ; pas d'alcool.",
+      "priceLevel": "$$",
+      "avgPricePerPerson": null,
+      "address": "78 Bis Derb Nkhel, Rahba Kdima, Marrakech",
+      "openingHours": null,
+      "phone": "+212 524 919 776",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "rooftop",
+        "sans-alcool",
+        "médina"
+      ],
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://tablejourney.com/morocco/marrakech/cuisine/moroccan/"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 140,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-dar-moha",
+      "type": "restaurant",
+      "name": "Dar Moha",
+      "city": "Marrakech",
+      "cuisine": "Marocaine raffinée",
+      "description": "Riad restauré : cuisine marocaine gastronomique du chef Moha Fedal.",
+      "priceLevel": "$$$",
+      "avgPricePerPerson": null,
+      "address": "81 Rue Dar El Bacha, Médina, Marrakech",
+      "openingHours": null,
+      "phone": "+212 5243-87043",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "riad",
+        "gastronomie"
+      ],
+      "rating": 4.8,
+      "notes": null,
+      "sources": [
+        "https://isleblue.co/categories/morocco-guide/articles/recommended-restaurants-in-marrakech"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 129,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount"
+      ]
+    },
+    {
+      "id": "marrakech-le-comptoir-darna",
+      "type": "restaurant",
+      "name": "Le Comptoir Darna",
+      "city": "Marrakech",
+      "cuisine": "Marocaine / méditerranéenne",
+      "description": "Villa Art déco d'Hivernage, deux spectacles chaque soir (21h30 et 23h20 selon une source).",
+      "priceLevel": "$$$",
+      "avgPricePerPerson": null,
+      "address": "Avenue Echouhada, Hivernage, Marrakech",
+      "openingHours": null,
+      "phone": "+212 524 121 671",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "soirée",
+        "spectacle",
+        "Hivernage"
+      ],
+      "rating": 4.5,
+      "notes": null,
+      "sources": [
+        "https://tablejourney.com/morocco/marrakech/cuisine/moroccan/",
+        "https://tablejourney.com/morocco/cuisine/moroccan/"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 220,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "marrakech-roti-d-or",
+      "type": "restaurant",
+      "name": "Roti d'Or",
+      "city": "Marrakech",
+      "cuisine": "Poulet rôti / sandwichs",
+      "description": "Comptoir économique de la médina : poulet rôti, wraps, falafels.",
+      "priceLevel": "$",
+      "avgPricePerPerson": null,
+      "address": null,
+      "openingHours": null,
+      "phone": "+212 524 772 036",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "économique",
+        "rapide",
+        "médina"
+      ],
+      "rating": 4.3,
+      "notes": "Adresse non trouvée : à compléter.",
+      "sources": [
+        "https://tablejourney.com/morocco/cuisine/moroccan/"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 122,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-rick-s-cafe",
+      "type": "restaurant",
+      "name": "Rick's Café",
+      "city": "Casablanca",
+      "cuisine": "Internationale / franco-marocaine",
+      "description": "Reconstitution du café du film Casablanca dans une maison de 1930 près de l'ancienne médina : piano-bar, jazz en soirée.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "248 Boulevard Sour Jdid, place du Jardin public, Ancienne médina, Casablanca",
+      "openingHours": "Déjeuner et dîner ; jazz à partir de 21h30 (selon Lonely Planet)",
+      "phone": "+212 522 274 207 / +212 522 274 208",
+      "email": "info@rickscafe.ma",
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "ambiance",
+        "jazz",
+        "dîner",
+        "incontournable"
+      ],
+      "rating": 4.1,
+      "notes": "Réserver ; code vestimentaire.",
+      "sources": [
+        "https://visitcasablanca.ma/en/mice-restaurants/ricks-cafe/",
+        "https://www-lonelyplanet-com-57e2.imagizer.com/morocco/casablanca/restaurants/rick-s-cafe/a/poi-eat/416616/1331580"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 219,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount"
+      ]
+    },
+    {
+      "id": "casablanca-la-sqala",
+      "type": "restaurant",
+      "name": "La Sqala",
+      "city": "Casablanca",
+      "cuisine": "Marocaine",
+      "description": "Restaurant dans un bastion fortifié du XVIIIe siècle : jardin andalou, tajines et couscous, animation musicale certains soirs.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "Boulevard des Almohades, près de l'ancienne médina, Casablanca",
+      "openingHours": null,
+      "phone": "+212 522 406 839",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "jardin",
+        "traditionnel",
+        "déjeuner"
+      ],
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://theculturetrip.com/africa/morocco/articles/the-10-best-restaurants-in-casablanca",
+        "https://besttime.app/app/Morocco/Casablanca/restaurant"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 97,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-le-cabestan",
+      "type": "restaurant",
+      "name": "Le Cabestan",
+      "city": "Casablanca",
+      "cuisine": "Méditerranéenne / fruits de mer",
+      "description": "Restaurant sous le phare d'El Hank, ambiance Riviera, poissons et fruits de mer.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "Phare d'El Hank, 90 Boulevard de la Corniche, Casablanca",
+      "openingHours": null,
+      "phone": "+212 522 361 851",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "vue-mer",
+        "poisson",
+        "dîner"
+      ],
+      "rating": 4.2,
+      "notes": null,
+      "sources": [
+        "https://besttime.app/app/Morocco/Casablanca/restaurant",
+        "https://www-lonelyplanet-com-57e2.imagizer.com/morocco/casablanca/restaurants"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 209,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-la-taverne-du-dauphin",
+      "type": "restaurant",
+      "name": "La Taverne du Dauphin",
+      "city": "Casablanca",
+      "cuisine": "Fruits de mer",
+      "description": "Institution près de Casa Port, sert des fruits de mer depuis 1958.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "Près de Casa Port, Casablanca",
+      "openingHours": null,
+      "phone": "+212 522 685 060",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "poisson",
+        "classique"
+      ],
+      "rating": 4.2,
+      "notes": "Adresse exacte non trouvée : à compléter.",
+      "sources": [
+        "https://www-lonelyplanet-com-57e2.imagizer.com/morocco/casablanca/restaurants"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 103,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-ostrea",
+      "type": "restaurant",
+      "name": "Ostréa",
+      "city": "Casablanca",
+      "cuisine": "Huîtres / fruits de mer",
+      "description": "Restaurant du port : huîtres d'Oualidia et poisson du jour.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "Port de Casablanca",
+      "openingHours": null,
+      "phone": "+212 522 632 935",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "huîtres",
+        "port"
+      ],
+      "rating": 4.5,
+      "notes": "Adresse exacte non trouvée : à compléter.",
+      "sources": [
+        "https://www-lonelyplanet-com-57e2.imagizer.com/morocco/casablanca/restaurants"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 60,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "casablanca-patisserie-bennis-habous",
+      "type": "restaurant",
+      "name": "Pâtisserie Bennis Habous",
+      "city": "Casablanca",
+      "cuisine": "Pâtisserie marocaine",
+      "description": "Célèbre pâtisserie du souk des Habous : cornes de gazelle et autres pâtisseries maghrébines.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "Souk Habous, Casablanca",
+      "openingHours": null,
+      "phone": "+212 522 920 506",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "pâtisserie",
+        "goûter",
+        "Habous"
+      ],
+      "rating": 3.9,
+      "notes": null,
+      "sources": [
+        "https://www-lonelyplanet-com-57e2.imagizer.com/morocco/casablanca/restaurants"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 210,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-le-ziryab",
+      "type": "restaurant",
+      "name": "Le Ziryab",
+      "city": "Rabat",
+      "cuisine": "Marocaine",
+      "description": "Demeure arabo-andalouse restaurée au cœur de la médina, musique traditionnelle le soir.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "10 Impasse Ennajjar, Avenue des Consuls, Rabat",
+      "openingHours": "Tous les jours 12h00-16h00 et 19h30-00h00",
+      "phone": "+212 537 733 636",
+      "email": "leziryabresa@gmail.com",
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "médina",
+        "traditionnel"
+      ],
+      "rating": 4.4,
+      "notes": null,
+      "sources": [
+        "https://www.visitrabat.com/en/lieux/le-ziryab-2/"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 239,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount"
+      ]
+    },
+    {
+      "id": "rabat-dinarjat",
+      "type": "restaurant",
+      "name": "Dinarjat",
+      "city": "Rabat",
+      "cuisine": "Marocaine",
+      "description": "Restaurant de riad dans la médina, cadre aux bougies, cuisine traditionnelle et rituels de table.",
+      "priceLevel": "$$$$",
+      "avgPricePerPerson": null,
+      "address": "Médina de Rabat",
+      "openingHours": null,
+      "phone": "+212 37 70 42 39",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "médina",
+        "dîner",
+        "ambiance"
+      ],
+      "rating": 3.8,
+      "notes": "Niveau de prix issu de Tripadvisor ; adresse exacte à compléter.",
+      "sources": [
+        "https://www.internationaltraveller.com/?p=31343",
+        "https://www.tripadvisor.fr/Restaurants-g293736-Rabat_Rabat_Sale_Kenitra.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 184,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount"
+      ]
+    },
+    {
+      "id": "rabat-cafe-maure-des-oudayas",
+      "type": "restaurant",
+      "name": "Café Maure des Oudayas",
+      "city": "Rabat",
+      "cuisine": "Salon de thé",
+      "description": "Salon de thé traditionnel dans la kasbah, face à la mer et à l'estuaire.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "Kasbah des Oudayas, Rabat",
+      "openingHours": null,
+      "phone": "+212 537 248 401",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "thé",
+        "vue",
+        "kasbah"
+      ],
+      "rating": 4.7,
+      "notes": null,
+      "sources": [
+        "https://theculturetrip.com/africa/morocco/articles/10-of-rabats-top-teahouses/"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 185,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-dar-zaki",
+      "type": "restaurant",
+      "name": "Dar Zaki",
+      "city": "Rabat",
+      "cuisine": "Marocaine / africaine",
+      "description": "Restaurant classé parmi les mieux notés de Rabat sur Tripadvisor.",
+      "priceLevel": "€€-€€€",
+      "avgPricePerPerson": null,
+      "address": null,
+      "openingHours": null,
+      "phone": "+212 537 368 157",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "traditionnel"
+      ],
+      "rating": 3.9,
+      "notes": "Adresse et horaires non trouvés : à compléter.",
+      "sources": [
+        "https://www.tripadvisor.fr/Restaurants-g293736-Rabat_Rabat_Sale_Kenitra.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 116,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-le-dhow",
+      "type": "restaurant",
+      "name": "Le Dhow",
+      "city": "Rabat",
+      "cuisine": "Française / méditerranéenne",
+      "description": "Bateau amarré sur le Bou Regreg, avec vue sur la kasbah et la tour Hassan.",
+      "priceLevel": "€€-€€€",
+      "avgPricePerPerson": null,
+      "address": "Quai du Bou Regreg, Rabat",
+      "openingHours": null,
+      "phone": "+212 537 142 590",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "vue",
+        "bateau"
+      ],
+      "rating": 4.5,
+      "notes": null,
+      "sources": [
+        "https://www.moroccoworldnews.com/2021/01/330420/moroccan-cuisine-nine-must-visit-restaurants-in-rabat",
+        "https://www.tripadvisor.es/Restaurants-g293736-Rabat_Rabat_Sale_Kenitra.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 78,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-le-grand-comptoir",
+      "type": "restaurant",
+      "name": "Le Grand Comptoir",
+      "city": "Rabat",
+      "cuisine": "Française",
+      "description": "Brasserie rénovée sur l'avenue Mohammed V.",
+      "priceLevel": null,
+      "avgPricePerPerson": null,
+      "address": "Avenue Mohammed V, Rabat",
+      "openingHours": null,
+      "phone": "+212 537 669 739",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "brasserie",
+        "centre-ville"
+      ],
+      "rating": 4.3,
+      "notes": null,
+      "sources": [
+        "https://aujourdhui.ma/?p=118511",
+        "https://www.internationaltraveller.com/?p=31343"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 208,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    },
+    {
+      "id": "rabat-golden-fish",
+      "type": "restaurant",
+      "name": "Golden Fish",
+      "city": "Rabat",
+      "cuisine": "Poisson / européenne",
+      "description": "Restaurant de l'hôtel Sofitel Jardin des Roses, cuisine de poisson autour de la piscine.",
+      "priceLevel": "€€-€€€",
+      "avgPricePerPerson": null,
+      "address": "Sofitel Rabat Jardin des Roses, Rabat",
+      "openingHours": null,
+      "phone": "+212 537 097 530",
+      "email": null,
+      "website": null,
+      "coordinates": null,
+      "tags": [
+        "poisson",
+        "hôtel"
+      ],
+      "rating": 4,
+      "notes": null,
+      "sources": [
+        "https://www.moroccoworldnews.com/2021/01/330420/moroccan-cuisine-nine-must-visit-restaurants-in-rabat",
+        "https://www.tripadvisor.es/Restaurants-g293736-Rabat_Rabat_Sale_Kenitra.html"
+      ],
+      "lastChecked": "2026-09-23",
+      "wikipediaTitle": null,
+      "image": {
+        "url": null,
+        "thumbnailUrl": null,
+        "credit": null,
+        "license": null,
+        "licenseUrl": null,
+        "sourceUrl": null,
+        "status": "todo"
+      },
+      "userRatingCount": 95,
+      "demoDataFields": [
+        "rating",
+        "userRatingCount",
+        "phone"
+      ]
+    }
+  ]
+}

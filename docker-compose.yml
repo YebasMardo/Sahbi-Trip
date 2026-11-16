@@ -1,0 +1,54 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_NAME: ${APP_NAME}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      JWT_SECRET: ${JWT_SECRET}
+      ACCESS_TOKEN_TIME_VALUE: ${ACCESS_TOKEN_TIME_VALUE}
+      ACCESS_TOKEN_TIME_UNIT: ${ACCESS_TOKEN_TIME_UNIT}
+      REFRESH_TOKEN_TIME_VALUE: ${REFRESH_TOKEN_TIME_VALUE}
+      REFRESH_TOKEN_TIME_UNIT: ${REFRESH_TOKEN_TIME_UNIT}
+      MONGODB_URI: ${MONGODB_URI}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY}
+      VOYAGE_EMBED_MODEL: ${VOYAGE_EMBED_MODEL}
+      VOYAGE_RERANK_MODEL: ${VOYAGE_RERANK_MODEL}
+      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS}
+    depends_on:
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  redis-data:

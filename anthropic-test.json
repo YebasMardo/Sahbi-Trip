@@ -1,0 +1,103 @@
+{
+  "model": "claude-sonnet-5",
+  "max_tokens": 4096,
+  "system": "Tu es un planificateur de voyage expert du Maroc.\n\nRÈGLES ABSOLUES :\n1. Tu n'utilises QUE des activités et restaurants renvoyés par les outils `searchActivities` / `searchRestaurants`. Tu n'inventes JAMAIS un lieu absent des résultats de ces outils.\n2. Tu n'inventes JAMAIS un prix, un horaire, une adresse ou une distance. Utilise les outils (`getDistance`, `estimateTransportCost`, `calculateBudget`).\n3. Tu respectes le budget total et par jour. Utilise `calculateBudget` pour vérifier avant de finaliser.\n4. Tu regroupes les activités proches le même jour et respectes les horaires d'ouverture (champ `openingHours`, texte libre — ne le reformule pas, cite-le).\n5. Tu réponds UNIQUEMENT avec un JSON valide, avec EXACTEMENT cette forme et ces clés (aucun texte hors JSON, aucune clé en plus ou renommée) :\n\n```json\n{\n  \"summary\": { \"days\": 2, \"cities\": 1, \"activitiesConsidered\": 12, \"activitiesSelected\": 6 },\n  \"days\": [\n    {\n      \"day\": 1,\n      \"city\": \"Marrakech\",\n      \"dayBudget\": 500,\n      \"items\": [\n        {\n          \"type\": \"activity\",\n          \"activityId\": \"marrakech-jardin-majorelle\",\n          \"startTime\": \"09:00\",\n          \"durationMin\": 90,\n          \"estimatedCost\": 150,\n          \"costIsEstimate\": false,\n          \"priceConfidence\": \"high\",\n          \"matchScore\": 82,\n          \"reason\": \"Correspond à l'intérêt nature du voyageur.\"\n        }\n      ]\n    }\n  ],\n  \"budget\": { \"total\": 3000, \"estimated\": 760, \"remaining\": 2240 },\n  \"warnings\": []\n}\n```\n\n   - `type` peut aussi valoir \"transport\" pour un trajet entre deux villes ou vers l'aéroport (optionnel — n'en ajoute que si un vrai déplacement inter-villes ou un transfert est nécessaire au programme). Pour ces items : appelle d'abord `estimateTransportCost` (et `getDistance` si pertinent), n'invente jamais le coût. `activityId` devient alors une étiquette descriptive que tu rédiges toi-même (ex. \"marrakech-casablanca-train\"), il n'y a pas de fiche catalogue pour un trajet.\n   - `activityId` (activités/restaurants) : copie EXACTEMENT le champ `refId` de l'item renvoyé par `searchActivities` ou `searchRestaurants`. Ne jamais inventer un id, ne jamais utiliser le nom du lieu.\n   - `estimatedCost`, `costIsEstimate`, `priceConfidence`, `matchScore` : copiés des champs correspondants renvoyés par l'outil (`price`/`priceRange`/`priceConfidence`, `matchScore`) — recalcule si besoin avec `calculateBudget`, n'invente jamais un chiffre.\n   - `dayBudget` : somme des `estimatedCost` du jour (utilise `calculateBudget`).\n   - `summary.activitiesConsidered`/`activitiesSelected` : nombre total de résultats vus via `searchActivities`/`searchRestaurants` cette session vs. nombre effectivement retenu dans `days[].items`.\n6. Chaque item contient une \"reason\" courte, dans la langue du profil, liée aux préférences du voyageur.\n7. Si le budget est trop serré pour satisfaire les préférences, propose la meilleure option possible et signale-le dans \"warnings\".\n8. Une valeur absente du dataset (`null`) doit être présentée comme \"non renseigné\" dans le texte de \"reason\", jamais remplacée par une estimation non signalée.",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Profil voyageur : 2 voyageur(s), 2 jours, villes : Marrakech. Budget total : 3000 MAD. Intérêts : culture, gastronomie. À éviter : rien de précisé. Langue de réponse : fr."
+    }
+  ],
+  "tools": [
+    {
+      "name": "searchActivities",
+      "description": "Recherche des activités réelles en base pour une ville et une intention.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string" },
+          "query": { "type": "string", "description": "Intention en langage naturel" },
+          "maxPrice": { "type": ["number", "null"] },
+          "freeOnly": { "type": ["boolean", "null"] },
+          "category": {
+            "type": ["string", "null"],
+            "enum": ["nature", "culture", "histoire", "plage", "shopping", "medina", "parc", "zoo", "parc-attractions", "place", "promenade", null]
+          }
+        },
+        "required": ["city", "query"]
+      }
+    },
+    {
+      "name": "searchRestaurants",
+      "description": "Recherche des restaurants réels en base pour une ville.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string" },
+          "cuisine": { "type": ["string", "null"] },
+          "priceLevel": { "type": ["string", "null"], "enum": ["$", "$$", "$$$", "$$$$", null] }
+        },
+        "required": ["city"]
+      }
+    },
+    {
+      "name": "searchAccommodations",
+      "description": "Recherche des logements pour une ville. Non couvert par le dataset actuel.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string" },
+          "maxPricePerNight": { "type": "number" }
+        },
+        "required": ["city", "maxPricePerNight"]
+      }
+    },
+    {
+      "name": "getDistance",
+      "description": "Distance et temps de trajet estimés entre deux lieux (activité ou restaurant) déjà connus.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "fromId": { "type": "string" },
+          "toId": { "type": "string" }
+        },
+        "required": ["fromId", "toId"]
+      }
+    },
+    {
+      "name": "estimateTransportCost",
+      "description": "Coût de transport estimé (MAD) entre deux lieux ou villes.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "fromCity": { "type": "string" },
+          "toCity": { "type": "string" },
+          "mode": { "type": "string", "enum": ["car", "public", "walk", "mixed"] }
+        },
+        "required": ["fromCity", "toCity", "mode"]
+      }
+    },
+    {
+      "name": "calculateBudget",
+      "description": "Calcule les totaux de budget (jour/séjour) pour une liste d'items sélectionnés.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "refId": { "type": "string" },
+                "type": { "type": "string", "enum": ["activity", "restaurant"] },
+                "day": { "type": "number" }
+              },
+              "required": ["refId", "type", "day"]
+            }
+          }
+        },
+        "required": ["items"]
+      }
+    }
+  ]
+}
